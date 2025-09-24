@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import heroImg from "../assets/ft-bg.jpg"; // replace with your soccer image
-import logo from "../assets/logo.png"; // replace with Dixon Super Cup logo
+import heroImg from "../assets/ft-bg.jpg"; // soccer background
+import logo from "../assets/logo.png"; // Dixon Super Cup logo
 
 export default function SupercupLanding() {
   return (
@@ -29,16 +29,18 @@ export default function SupercupLanding() {
 
       {/* Hero Content */}
       <div className="container text-center my-auto">
-        <motion.h5
-          className="text-uppercase text-warning fw-bold"
+        {/* Replaced motion.h5 with motion.div styled as h5 */}
+        <motion.div
+          className="h5 text-uppercase text-warning fw-bold"
           initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
         >
           Keiyo Ward’s Biggest
-        </motion.h5>
+        </motion.div>
 
-        <motion.h1
+        {/* Replaced motion.h1 with motion.div styled as h1 */}
+        <motion.div
           className="display-3 fw-bold"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -46,7 +48,7 @@ export default function SupercupLanding() {
         >
           <span className="text-white">Super Cup</span>{" "}
           <span className="text-warning">Classic</span>
-        </motion.h1>
+        </motion.div>
 
         {/* Lime Green Description */}
         <motion.p

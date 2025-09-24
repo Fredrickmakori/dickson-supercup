@@ -1,6 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaTicketAlt, FaFutbol, FaChalkboardTeacher, FaUserTie, FaTrophy } from "react-icons/fa";
+import {
+  FaTicketAlt,
+  FaFutbol,
+  FaChalkboardTeacher,
+  FaUserTie,
+  FaTrophy,
+} from "react-icons/fa";
 
 export default function RegistrationHome() {
   return (
@@ -10,19 +16,34 @@ export default function RegistrationHome() {
         Choose your registration type for the Dickson Super Cup Classic:
       </p>
       <div className="d-flex flex-wrap gap-3 justify-content-center">
-        <Link className="btn btn-danger btn-lg d-flex align-items-center gap-2" to="/register/ticket">
+        <Link
+          className="btn btn-danger btn-lg d-flex align-items-center gap-2"
+          to="/register/ticket"
+        >
           <FaTicketAlt size={22} /> Ticket Registration
         </Link>
-        <Link className="btn btn-success btn-lg d-flex align-items-center gap-2" to="/register/player">
+        <Link
+          className="btn btn-success btn-lg d-flex align-items-center gap-2"
+          to="/register/player"
+        >
           <FaFutbol size={22} /> Player Registration
         </Link>
-        <Link className="btn btn-primary btn-lg d-flex align-items-center gap-2" to="/register/coach">
+        <Link
+          className="btn btn-primary btn-lg d-flex align-items-center gap-2"
+          to="/register/coach"
+        >
           <FaChalkboardTeacher size={22} /> Coach Registration
         </Link>
-        <Link className="btn btn-info btn-lg d-flex align-items-center gap-2 text-dark" to="/register/manager">
+        <Link
+          className="btn btn-info btn-lg d-flex align-items-center gap-2 text-dark"
+          to="/register/manager"
+        >
           <FaUserTie size={22} /> Manager Registration
         </Link>
-        <Link className="btn btn-warning btn-lg d-flex align-items-center gap-2 text-dark" to="/register/team">
+        <Link
+          className="btn btn-warning btn-lg d-flex align-items-center gap-2 text-dark"
+          to="/register/team"
+        >
           <FaTrophy size={22} /> Team Registration
         </Link>
       </div>
