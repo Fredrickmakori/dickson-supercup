@@ -1,0 +1,19 @@
+/* Make root container fill the viewport */
+.site-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Main content grows and pushes footer down */
+.app-main {
+  flex: 1;
+}
+
+/* Footer stays at the bottom naturally */
+.app-footer {
+  background-color: #f8f9fa;
+  padding: 10px;
+  text-align: center;
+  border-top: 1px solid #ddd;
+}
