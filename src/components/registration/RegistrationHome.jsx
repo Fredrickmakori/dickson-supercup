@@ -15,6 +15,13 @@ export default function RegistrationHome() {
       <p className="mb-4 text-light fs-5">
         Choose your registration type for the Dickson Super Cup Classic:
       </p>
+      <p className="text-muted small mb-4">
+        By registering you agree to our{" "}
+        <a href="/policy" target="_blank" rel="noopener noreferrer">
+          Terms &amp; Policy
+        </a>
+        .
+      </p>
       <div className="d-flex flex-wrap gap-3 justify-content-center">
         <Link
           className="btn btn-danger btn-lg d-flex align-items-center gap-2"

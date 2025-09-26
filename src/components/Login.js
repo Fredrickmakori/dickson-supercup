@@ -2,21 +2,10 @@ import React, { useState } from "react";
 import { FaGoogle, FaUser, FaLock, FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { auth } from "../firebase";
 
 export default function Login() {
-  const {
-    user,
-    loading,
-    signInWithGoogle,
-    signOutUser,
-    signUpWithEmail,
-    signInWithEmail,
-    setRoleForUser,
-    getRoleForUser,
-    redirectPath,
-    setRedirectPath,
-  } = useAuth();
+  const { user, loading, signInWithGoogle, signUpWithEmail, signInWithEmail } =
+    useAuth();
 
   const navigate = useNavigate();
   const [processing, setProcessing] = useState(false);

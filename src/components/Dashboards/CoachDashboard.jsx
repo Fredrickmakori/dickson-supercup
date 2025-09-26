@@ -3,6 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { db } from "../../firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { Card, CardContent } from "../ui/card";
+import { doc, updateDoc } from "firebase/firestore";
 
 export default function CoachDashboard() {
   const { user } = useAuth();
@@ -65,6 +66,21 @@ export default function CoachDashboard() {
     };
   }, [user]);
 
+  // Also fetch teams assigned to this coach
+  const [teams, setTeams] = useState([]);
+  useEffect(() => {
+    if (!user) return;
+    const q = query(collection(db, "teams"), where("coachId", "==", user.uid));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setTeams(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      },
+      (err) => console.error("teams listen", err)
+    );
+    return () => unsub();
+  }, [user]);
+
   return (
     <div className="container py-4">
       <h3 className="fw-bold mb-4">⚽ Coach Dashboard</h3>
@@ -109,6 +125,88 @@ export default function CoachDashboard() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* Teams managed by this coach */}
+      <div className="mt-4">
+        <h5 className="mb-3">Your Teams</h5>
+        {teams.length === 0 ? (
+          <div className="text-muted">No teams assigned to you.</div>
+        ) : (
+          <div className="row g-3">
+            {teams.map((t) => (
+              <div key={t.id} className="col-md-4">
+                <div className="card">
+                  <div className="card-body">
+                    <h6 className="mb-1">{t.teamName || t.name}</h6>
+                    <div className="small text-muted">
+                      Players:{" "}
+                      {t.players ? t.players.length : t.membersCount || 0}
+                    </div>
+                    <div className="small text-muted">
+                      Region: {t.region || "—"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Player list with inline position management */}
+      <div className="mt-4">
+        <h5 className="mb-3">Players (manage positions)</h5>
+        {players.length === 0 ? (
+          <div className="text-muted">No players assigned.</div>
+        ) : (
+          <div className="list-group">
+            {players.map((p) => (
+              <div
+                key={p.id}
+                className="list-group-item d-flex align-items-center justify-content-between"
+              >
+                <div>
+                  <div className="fw-bold">
+                    {p.fullName || p.name || "Player"}
+                  </div>
+                  <div className="small text-muted">
+                    Team: {p.teamName || p.team || "—"}
+                  </div>
+                </div>
+                <div className="d-flex align-items-center gap-2">
+                  <select
+                    value={p.position || ""}
+                    onChange={async (e) => {
+                      const newPos = e.target.value;
+                      try {
+                        const ref = doc(db, "players", p.id);
+                        await updateDoc(ref, { position: newPos });
+                      } catch (err) {
+                        console.error("failed update position", err);
+                      }
+                    }}
+                    className="form-select form-select-sm"
+                  >
+                    <option value="">— position —</option>
+                    <option value="GK">GK</option>
+                    <option value="CB">CB</option>
+                    <option value="LB">LB</option>
+                    <option value="RB">RB</option>
+                    <option value="CM">CM</option>
+                    <option value="CAM">CAM</option>
+                    <option value="LM">LM</option>
+                    <option value="RM">RM</option>
+                    <option value="LW">LW</option>
+                    <option value="RW">RW</option>
+                    <option value="ST">ST</option>
+                    <option value="CF">CF</option>
+                  </select>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

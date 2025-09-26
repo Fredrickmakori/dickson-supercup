@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, href } from "react-router-dom";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 import Landing from "./components/Landing";
 import Login from "./components/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -17,6 +17,7 @@ import RegistrationHome from "./components/registration/RegistrationHome";
 import RegistrationSuccess from "./components/registration/RegistrationSuccess";
 import LearnMorePage from "./pages/LearnMorePage";
 import ViewTeamsPage from "./pages/ViewTeamsPage";
+import TeamDetailPage from "./pages/TeamDetailPage";
 import AboutPage from "./pages/AboutPage";
 import AppFooter from "./components/Footer";
 import VerifyPayment from "./pages/VerifyPayment";
@@ -57,6 +58,7 @@ function App() {
               {/* Admin routes use the shared DashboardLayout and nested routes */}
               <Route path="/learn" element={<LearnMorePage />} />
               <Route path="/teams" element={<ViewTeamsPage />} />
+              <Route path="/teams/:id" element={<TeamDetailPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route
                 path="/admin"
@@ -90,7 +92,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="*" element={<NotFound />} />'
+              <Route path="*" element={<NotFound />} />
               {/* ...existing routes... */}
             </Routes>
           </main>

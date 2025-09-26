@@ -16,6 +16,7 @@ export default function CoachRegistration() {
   });
 
   const [showSuccess, setShowSuccess] = useState(false);
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,6 +24,8 @@ export default function CoachRegistration() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!acceptedPolicy)
+      return alert("You must accept the Terms & Policy to register.");
     try {
       await saveRegistration(formData);
       setShowSuccess(true); // ✅ show success modal
@@ -90,6 +93,25 @@ export default function CoachRegistration() {
           className="form-control mb-3"
           required
         />
+
+        <div className="form-check form-switch mb-3 text-start">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            id="acceptPolicyCoach"
+            checked={acceptedPolicy}
+            onChange={(e) => setAcceptedPolicy(e.target.checked)}
+          />
+          <label
+            className="form-check-label small ms-2"
+            htmlFor="acceptPolicyCoach"
+          >
+            I agree to the{" "}
+            <a href="/policy" target="_blank" rel="noopener noreferrer">
+              Terms &amp; Policy
+            </a>
+          </label>
+        </div>
 
         <button type="submit" className="btn btn-warning fw-bold">
           Register Coach

@@ -55,6 +55,16 @@ export default function RegistrationSuccess({ show, onClose, role }) {
               <FaTachometerAlt className="me-2" />
               Go to Dashboard
             </Link>
+            <div className="w-100 text-center mt-2">
+              <small className="text-muted d-block">
+                How to reach admin panel
+              </small>
+              <small className="text-muted">
+                If you have admin access, go to <code>/admin</code> or use the
+                top navigation "Admin" link. Contact the event organizer to
+                request admin privileges.
+              </small>
+            </div>
           </div>
         </div>
       </div>

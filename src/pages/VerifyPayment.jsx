@@ -55,7 +55,10 @@ export default function VerifyPayment() {
       <h2 className="fw-bold text-center mb-4 text-warning">Verify Payment</h2>
 
       {!showSuccess ? (
-        <form className="card p-4 shadow-lg bg-dark text-light" onSubmit={handleSubmit}>
+        <form
+          className="card p-4 shadow-lg bg-dark text-light"
+          onSubmit={handleSubmit}
+        >
           <p className="mb-3">Please verify your payment method:</p>
 
           <div className="mb-3">
@@ -69,7 +72,9 @@ export default function VerifyPayment() {
                 className="form-check-input"
                 required
               />
-              <span className="form-check-label">Upload Mpesa Message Screenshot</span>
+              <span className="form-check-label">
+                Upload Mpesa Message Screenshot
+              </span>
             </label>
             {option === "mpesa" && (
               <input
@@ -92,7 +97,9 @@ export default function VerifyPayment() {
                 onChange={(e) => setOption(e.target.value)}
                 className="form-check-input"
               />
-              <span className="form-check-label">Enter M-Changa Payment Link</span>
+              <span className="form-check-label">
+                Enter M-Changa Payment Link
+              </span>
             </label>
             {option === "mchanga" && (
               <input
@@ -106,19 +113,26 @@ export default function VerifyPayment() {
             )}
           </div>
 
-          <button type="submit" className="btn btn-warning fw-bold" disabled={loading}>
+          <button
+            type="submit"
+            className="btn btn-warning fw-bold"
+            disabled={loading}
+          >
             {loading ? "Verifying..." : "Submit Verification"}
-            {!showSuccess && <p className="lead">Verifying your payment...</p>}
-
-      {/* Success Modal */}
-      <RegistrationSuccess
-        show={showSuccess}
-        onClose={() => navigate("/")} // close modal → go home
-      />
           </button>
+
+          {/* Success Modal (sibling to button) */}
+          <RegistrationSuccess
+            show={showSuccess}
+            onClose={() => navigate("/")} // close modal → go home
+          />
         </form>
       ) : (
-        <RegistrationSuccess show={true} onClose={() => navigate("/")} role={role} />
+        <RegistrationSuccess
+          show={true}
+          onClose={() => navigate("/")}
+          role={role}
+        />
       )}
     </div>
   );
