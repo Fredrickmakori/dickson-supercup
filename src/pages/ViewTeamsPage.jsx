@@ -16,7 +16,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { app } from "../firebase"; // ensure firebase is initialized and exported from this module
 import { mapPosition } from "../utils/positionMap";
-
+import SL from "../assets/SL.png";
 export default function ViewTeamsPage() {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -118,25 +118,28 @@ export default function ViewTeamsPage() {
     setTimeout(() => setToast({ show: false, message: "", type: "info" }), ms);
   }
 
-  // Signup form HTML template generator
-  const signupFormTemplate = (teamName = "") => {
+  // Signup form HTML template generator (accepts logoDataUrl to embed image inline)
+  const signupFormTemplate = (teamName = "", logoDataUrl = null) => {
     const safeTeam = teamName || "";
-    return `<!doctype html>
+    const logoSrc = logoDataUrl || SL || '';
+    return (
+      `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tournament Player Sign-up Form</title>
+  <title>Dickson Super Cup Classic - Player Sign-up Form</title>
   <style>
     @page { size: A4 portrait; margin: 12mm; }
     @media print { body { margin: 0; -webkit-print-color-adjust: exact; } .no-print { display: none; } }
     body { font-family: Arial, Helvetica, sans-serif; background: #f2f2f2; margin: 16px; color: #222; }
     .page { width:210mm; max-width:100%; margin:0 auto; background:white; border-radius:6px; box-shadow:0 6px 18px rgba(0,0,0,0.12); overflow:hidden; padding-bottom:18px; }
     header { display:flex; gap:16px; align-items:center; padding:18px; background: linear-gradient(90deg,#e53935 0%, #d32f2f 40%); color:white; }
-    .logo { width:84px; height:84px; flex:0 0 84px; background:white; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-    .logo img { width:100%; height:auto; display:block; }
-    .title { flex:1; }
-    .title h1 { margin:0; font-size:22px; }
+  .logo { width:84px; height:84px; flex:0 0 84px; background:white; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .logo img { width:100%; height:auto; display:block; }
+  .title { flex:1; text-align:center; }
+  .title h1 { margin:0; font-size:26px; color: #ffdd00; text-shadow: 0 2px 6px rgba(0,0,0,0.4); font-weight:800; }
+  .subtitle { margin-top:6px; font-size:13px; color:#fffde7; }
     .accent { height:12px; background: linear-gradient(90deg,#ffd400 0%, #ffec3d 60%); }
     .meta { display:flex; gap:12px; padding:12px 18px; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(0,0,0,0.06); }
     .form-area { padding:12px 18px; }
@@ -155,11 +158,11 @@ export default function ViewTeamsPage() {
   </style>
 </head>
 <body>
-  <div class="page" role="document">
+      <div class="page" role="document">
     <header>
-      <div class="logo" aria-hidden="true"><img src="logo.png" alt="Tournament logo"/></div>
-      <div class="title"><h1>Tournament Sign-up Form</h1><div class="subtitle">Player Sign-up — Please fill clearly. One row per player.</div></div>
-      <div style="min-width:120px; text-align:right;"><div style="font-weight:700; font-size:12px;">Event:</div><div style="font-size:12px;">Super Cup Classic</div></div>
+      <div class="logo" aria-hidden="true"> <img src="${logoSrc}" alt="Super Cup logo"/></div>
+      <div class="title"><h1>Dickson Super Cup Classic</h1><div class="subtitle">Player Sign-up — Please fill clearly. One row per player.</div></div>
+      <div style="min-width:120px; text-align:right;"><div style="font-weight:700; font-size:12px;">Event:</div><div style="font-size:12px;">Dickson Super Cup Classic</div></div>
     </header>
     <div class="accent" aria-hidden="true"></div>
     <div class="meta">
@@ -180,32 +183,59 @@ export default function ViewTeamsPage() {
           </tr>
         </thead>
         <tbody>
-` + (() => {
-      // build 20 rows as HTML
-      let rows = '';
-      for (let i = 1; i <= 20; i++) {
-        rows += `<tr><td class="col-no">${i}</td><td class="col-name"><span class="line"></span></td><td class="col-area"><span class="line"></span></td><td class="col-team"><span class="line"></span></td><td class="col-phone"><span class="line"></span></td><td class="col-id"><span class="line"></span></td><td class="col-signature"><span class="line" style="width:90px; display:inline-block;"></span></td></tr>`;
-      }
-      return rows + `</tbody></table></div><div class="footer"><div><small><strong>Note:</strong> By signing, the player confirms they meet age/eligibility requirements.</small></div><div style="text-align:right"><div><strong>Prepared by:</strong> ____________________</div><div style="margin-top:8px"><strong>Official signature:</strong> ____________________</div></div></div></div></body></html>`;
-    })();
+` +
+      (() => {
+        // build 20 rows as HTML
+        let rows = "";
+        for (let i = 1; i <= 20; i++) {
+          rows += `<tr><td class="col-no">${i}</td><td class="col-name"><span class="line"></span></td><td class="col-area"><span class="line"></span></td><td class="col-team"><span class="line"></span></td><td class="col-phone"><span class="line"></span></td><td class="col-id"><span class="line"></span></td><td class="col-signature"><span class="line" style="width:90px; display:inline-block;"></span></td></tr>`;
+        }
+        return (
+          rows +
+          `</tbody></table></div><div class="footer"><div><small><strong>Note:</strong> By signing, the player confirms they meet age/eligibility requirements.</small></div><div style="text-align:right"><div><strong>Prepared by:</strong> ____________________</div><div style="margin-top:8px"><strong>Official signature:</strong> ____________________</div></div></div></div></body></html>`
+        );
+      })()
+    );
   };
 
-  const downloadSignupForm = (teamName = '') => {
+  // convert an imported asset URL to a data URL (base64) so the downloaded HTML embeds the image
+  async function urlToDataUrl(url) {
     try {
-      const html = signupFormTemplate(teamName);
-      const blob = new Blob([html], { type: 'text/html' });
+      const resp = await fetch(url);
+      const blob = await resp.blob();
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (e) {
+      console.warn("Failed to convert logo to data URL", e);
+      return url; // fallback to URL if conversion fails
+    }
+  }
+
+  const downloadSignupForm = async (teamName = "") => {
+    try {
+      // try to embed the project's imported logo as a data URL so the downloaded file displays the logo offline
+      let logoData = SL;
+      if (SL) {
+        logoData = await urlToDataUrl(SL).catch(() => SL);
+      }
+      const html = signupFormTemplate(teamName, logoData);
+      const blob = new Blob([html], { type: "text/html" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `${(teamName || 'tournament').replace(/[^a-z0-9\-\_ ]/gi,'_')}-signup-form.html`;
+      a.download = `${(teamName || "tournament").replace(/[^a-z0-9\-\_ ]/gi, "_")}-signup-form.html`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      showToast('Signup form downloaded', 'success');
+      showToast("Signup form downloaded", "success");
     } catch (e) {
-      console.error('Download failed', e);
-      showToast('Failed to download form', 'danger');
+      console.error("Download failed", e);
+      showToast("Failed to download form", "danger");
     }
   };
 
@@ -287,7 +317,7 @@ export default function ViewTeamsPage() {
           <div style={{ marginLeft: 12 }}>
             <button
               className="btn btn-sm btn-outline-light"
-              onClick={() => downloadSignupForm('')}
+              onClick={() => downloadSignupForm("")}
               title="Download blank signup form"
             >
               Download Signup Form
@@ -445,7 +475,9 @@ export default function ViewTeamsPage() {
                         <button
                           className="btn btn-sm btn-outline-success"
                           title="Download signup form prefilled with team name"
-                          onClick={() => downloadSignupForm(team.teamName || team.name || '')}
+                          onClick={() =>
+                            downloadSignupForm(team.teamName || team.name || "")
+                          }
                         >
                           Download Form
                         </button>
