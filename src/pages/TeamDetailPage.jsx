@@ -3,13 +3,14 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   getFirestore,
   doc,
-  getDoc,
   collection,
   onSnapshot,
   addDoc,
+  updateDoc,
   getDocs,
 } from "firebase/firestore";
 import { app } from "../firebase";
+import RegistrationService from "../services/RegistrationService";
 import { motion } from "framer-motion";
 
 export default function TeamDetailPage() {
@@ -19,6 +20,9 @@ export default function TeamDetailPage() {
   const [team, setTeam] = useState(null);
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [proofText, setProofText] = useState("");
+  const [submittingProof, setSubmittingProof] = useState(false);
+  const regSvc = new RegistrationService();
 
   useEffect(() => {
     if (!id) return;
@@ -62,7 +66,7 @@ export default function TeamDetailPage() {
         unsubPlayers();
       } catch (e) {}
     };
-  }, [id]);
+  }, [id, db]);
 
   async function createPlayersFromRegistrations() {
     // copy matching registrations into teams/{id}/players
@@ -170,6 +174,64 @@ export default function TeamDetailPage() {
                 ))}
               </ul>
             )}
+          </div>
+        </div>
+
+        <div className="card mb-3">
+          <div className="card-body">
+            <h5 className="mb-2">Payment Proof (M-Pesa)</h5>
+            <div className="mb-2 text-muted small">
+              If you've made payment, paste the M-Pesa confirmation message or
+              transaction ID below and submit. Admins will review and verify the
+              payment.
+            </div>
+            <textarea
+              rows={4}
+              className="form-control mb-2"
+              placeholder="Paste M-Pesa message or transaction ID here"
+              value={proofText}
+              onChange={(e) => setProofText(e.target.value)}
+            />
+            <div className="d-flex gap-2">
+              <button
+                className="btn btn-warning"
+                onClick={async () => {
+                  if (!proofText.trim())
+                    return alert(
+                      "Please paste the M-Pesa message or transaction ID."
+                    );
+                  try {
+                    setSubmittingProof(true);
+                    // use RegistrationService to add proof with server timestamp
+                    await regSvc.addPaymentProof(id, {
+                      text: proofText.trim(),
+                      submittedBy: null,
+                    });
+                    // mark team as submitted for admin review
+                    const tref = doc(db, "teams", id);
+                    await updateDoc(tref, { paymentStatus: "submitted" });
+                    setProofText("");
+                    alert(
+                      "✔️ Proof submitted. Admins will review and verify the payment."
+                    );
+                  } catch (e) {
+                    console.error("submit proof", e);
+                    alert("Failed to submit proof. Try again.");
+                  } finally {
+                    setSubmittingProof(false);
+                  }
+                }}
+                disabled={submittingProof}
+              >
+                Submit Proof
+              </button>
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => setProofText("")}
+              >
+                Clear
+              </button>
+            </div>
           </div>
         </div>
       </motion.div>

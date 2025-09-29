@@ -90,14 +90,14 @@ export default function AdminCaves() {
 
   async function approve(id) {
     const next = teams.map((t) =>
-      t.id === id ? { ...t, approved: true, paymentStatus: "approved" } : t
+      t.id === id ? { ...t, approved: true, paymentStatus: "verified" } : t
     );
     setTeams(next);
     // update Firestore - set paymentStatus and optional approved flag
     const db = getFirestore(app);
     const ref = doc(db, "registrations", id);
     try {
-      await updateDoc(ref, { paymentStatus: "approved", approved: true });
+      await updateDoc(ref, { paymentStatus: "verified", approved: true });
     } catch (err) {
       console.error("Approve failed", err);
     }
@@ -121,7 +121,7 @@ export default function AdminCaves() {
     const next = teams.map((t) => ({
       ...t,
       approved: true,
-      paymentStatus: "approved",
+      paymentStatus: "verified",
     }));
     setTeams(next);
     const db = getFirestore(app);
@@ -130,7 +130,7 @@ export default function AdminCaves() {
         const ref = doc(db, "registrations", t.id);
         return updateDoc(ref, {
           approved: true,
-          paymentStatus: "approved",
+          paymentStatus: "verified",
         }).catch(() => {});
       })
     );

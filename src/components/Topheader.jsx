@@ -1,10 +1,118 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/logo.png"; // ✅ safer import for bundlers
+import { db } from "../firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 export default function TopHeader() {
-  const { user, loading, signOutUser, role } = useAuth();
+  const { user, loading, signOutUser, role, setRoleForUser } = useAuth();
+  const [userRoles, setUserRoles] = useState([]);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Admin emails that should always have admin access
+  const allowedAdmins = [
+    "fredrickmakori102@gmail.com",
+    "dicksonomari4@gmail.com",
+  ];
+
+  useEffect(() => {
+    let mounted = true;
+    async function ensureUserDoc() {
+      if (!user) return;
+
+      try {
+        const uRef = doc(db, "users", user.uid);
+        const snap = await getDoc(uRef);
+        if (!snap.exists()) {
+          // first time: create user doc with basic demographics and initial role
+          const initialRoles = allowedAdmins.includes(user.email)
+            ? ["admin"]
+            : ["guest"];
+          const payload = {
+            displayName: user.displayName || "",
+            email: user.email || "",
+            photoURL: user.photoURL || "",
+            roles: initialRoles,
+            createdAt: serverTimestamp(),
+          };
+          await setDoc(uRef, payload, { merge: true });
+          if (mounted) setUserRoles(payload.roles);
+          // Sync AuthContext role for backwards compatibility (pick first role)
+          if (setRoleForUser) await setRoleForUser(user.uid, initialRoles[0]);
+        } else {
+          const data = snap.data();
+          const roles =
+            data.roles ||
+            (allowedAdmins.includes(user.email) ? ["admin"] : ["guest"]);
+          if (mounted) setUserRoles(roles);
+          // keep AuthContext role in sync with users doc (first role)
+          if (setRoleForUser) await setRoleForUser(user.uid, roles[0]);
+        }
+      } catch (err) {
+        console.error("Error ensuring user doc:", err);
+      }
+    }
+
+    ensureUserDoc();
+    return () => {
+      mounted = false;
+    };
+  }, [user?.uid]);
+
+  function closeNavbar() {
+    try {
+      const el = document.getElementById("mainNavbar");
+      if (el && el.classList.contains("show")) {
+        el.classList.remove("show");
+        // update toggler aria-expanded
+        const toggler = document.querySelector(".navbar-toggler");
+        if (toggler) toggler.setAttribute("aria-expanded", "false");
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  function scrollToProgramsSmooth() {
+    try {
+      const target =
+        document.getElementById("programs") ||
+        document.querySelector("[data-section=programs]");
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  async function handleProgramsClick(e) {
+    // If we're on the homepage, just scroll to the section.
+    e && e.preventDefault();
+    if (location.pathname === "/" || location.pathname === "") {
+      const ok = scrollToProgramsSmooth();
+      if (ok) closeNavbar();
+      return;
+    }
+    // navigate to home first, then scroll after a short delay to allow DOM render
+    try {
+      await navigate("/");
+      setTimeout(() => {
+        scrollToProgramsSmooth();
+        closeNavbar();
+      }, 200);
+    } catch (e) {
+      // fallback: navigate normally
+      navigate("/");
+    }
+  }
+
+  function handleNavClick() {
+    // close collapsed navbar on small screens after selection
+    closeNavbar();
+  }
 
   return (
     <header>
@@ -25,8 +133,8 @@ export default function TopHeader() {
             <img
               src={logo}
               alt="M-FOUNDATION"
-              width={32}
-              height={32}
+              width={39}
+              height={39}
               className="rounded-circle"
             />
             <span className="fw-bold">M-Foundation</span>
@@ -61,14 +169,13 @@ export default function TopHeader() {
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink
-                  to="/programs"
-                  className={({ isActive }) =>
-                    `nav-link ${isActive ? "active fw-bold" : ""}`
-                  }
+                <a
+                  href="/programs"
+                  className="nav-link"
+                  onClick={handleProgramsClick}
                 >
                   Programs
-                </NavLink>
+                </a>
               </li>
               <li className="nav-item">
                 <NavLink
@@ -81,30 +188,47 @@ export default function TopHeader() {
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink
-                  to="/donate"
-                  className={({ isActive }) =>
-                    `nav-link ${isActive ? "active fw-bold" : ""}`
-                  }
+                <a
+                  className="nav-link"
+                  href="/donate"
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={closeNavbar}
                 >
                   PayNow
-                </NavLink>
+                </a>
               </li>
 
-              {/* Role-based Quick Links */}
-              {user && role === "manager" && (
+              {/* Role-based Quick Links (driven by users/{uid}.roles) */}
+              {user && userRoles.includes("admin") && (
+                <li className="nav-item">
+                  <NavLink
+                    to="/admin"
+                    className={({ isActive }) =>
+                      `nav-link ${isActive ? "active fw-bold" : ""}`
+                    }
+                    onClick={handleNavClick}
+                  >
+                    Admin Dashboard
+                  </NavLink>
+                </li>
+              )}
+
+              {user && userRoles.includes("manager") && (
                 <li className="nav-item">
                   <NavLink
                     to="/admin/manager"
                     className={({ isActive }) =>
                       `nav-link ${isActive ? "active fw-bold" : ""}`
                     }
+                    onClick={handleNavClick}
                   >
                     Team Manager
                   </NavLink>
                 </li>
               )}
-              {user && role === "coach" && (
+
+              {user && userRoles.includes("coach") && (
                 <li className="nav-item">
                   <NavLink
                     to="/admin/coach"
@@ -116,7 +240,8 @@ export default function TopHeader() {
                   </NavLink>
                 </li>
               )}
-              {user && role === "player" && (
+
+              {user && userRoles.includes("player") && (
                 <li className="nav-item">
                   <NavLink
                     to="/admin/player"
@@ -182,7 +307,10 @@ export default function TopHeader() {
                     <li>
                       <button
                         className="dropdown-item text-danger"
-                        onClick={() => signOutUser()}
+                        onClick={() => {
+                          signOutUser();
+                          closeNavbar();
+                        }}
                       >
                         Sign out
                       </button>

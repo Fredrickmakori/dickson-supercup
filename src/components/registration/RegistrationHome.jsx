@@ -12,7 +12,7 @@ export default function RegistrationHome() {
   return (
     <section className="container py-5 text-center">
       <h2 className="fw-bold mb-4 text-warning">Registration Portal</h2>
-      <p className="mb-4 text-light fs-5">
+      <p className="mb-4 text-danger fs-5">
         Choose your registration type for the Dickson Super Cup Classic:
       </p>
       <p className="text-muted small mb-4">

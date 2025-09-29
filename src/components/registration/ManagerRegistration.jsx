@@ -1,9 +1,13 @@
 import React, { useState } from "react";
-import { saveRegistration } from "../../firebase";
+import RegistrationService from "../../services/RegistrationService";
+import { useAuth } from "../../context/AuthContext";
 import { FaUserTie } from "react-icons/fa";
 import RegistrationSuccess from "./RegistrationSuccess";
 
+const regService = new RegistrationService();
+
 export default function ManagerRegistration() {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     fullName: "",
     clubName: "",
@@ -15,6 +19,7 @@ export default function ManagerRegistration() {
   });
 
   const [showSuccess, setShowSuccess] = useState(false);
+  const [lastRegistrationId, setLastRegistrationId] = useState(null);
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
 
   const handleChange = (e) => {
@@ -26,11 +31,20 @@ export default function ManagerRegistration() {
     if (!acceptedPolicy)
       return alert("You must accept the Terms & Policy to register.");
     try {
-      await saveRegistration(formData);
-      setShowSuccess(true); // ✅ show modal on success
+      const managerId = await regService.addManager(formData, user || null);
+      setLastRegistrationId(managerId);
+      if (formData.team) {
+        const resolvedId = await regService.resolveTeamId(formData.team);
+        if (resolvedId) {
+          await regService.addManagerToTeam(resolvedId, managerId);
+        } else {
+          console.warn("Team not found for manager attachment:", formData.team);
+        }
+      }
+      setShowSuccess(true);
     } catch (err) {
-      alert("❌ Registration failed. Please try again.");
       console.error(err);
+      alert("❌ Registration failed. Please try again.");
     }
   };
 
@@ -115,6 +129,9 @@ export default function ManagerRegistration() {
         show={showSuccess}
         onClose={() => setShowSuccess(false)}
         role={formData.role} // 👈 sends "manager"
+        registrationId={lastRegistrationId}
+        teamId={formData.team || null}
+        teamName={formData.clubName || formData.team || null}
       />
     </div>
   );

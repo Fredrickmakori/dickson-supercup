@@ -12,6 +12,7 @@ export default function VerifyPayment() {
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [role, setRole] = useState("");
+  const [registrationId, setRegistrationId] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,10 +32,11 @@ export default function VerifyPayment() {
       // For now, just simulate verification
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      await saveRegistration(data.role, {
+      const id = await saveRegistration(data.role, {
         ...data,
         paymentProof: option === "mpesa" ? "Mpesa screenshot" : link,
       });
+      setRegistrationId(id);
 
       sessionStorage.removeItem("pendingTeamRegistration");
 
@@ -125,6 +127,7 @@ export default function VerifyPayment() {
           <RegistrationSuccess
             show={showSuccess}
             onClose={() => navigate("/")} // close modal → go home
+            registrationId={registrationId}
           />
         </form>
       ) : (
@@ -132,6 +135,7 @@ export default function VerifyPayment() {
           show={true}
           onClose={() => navigate("/")}
           role={role}
+          registrationId={registrationId}
         />
       )}
     </div>

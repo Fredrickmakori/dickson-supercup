@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { db } from "../../firebase";
+import { getDoc } from "firebase/firestore";
+import { FaDownload } from "react-icons/fa";
+import * as XLSX from "xlsx";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { Card, CardContent } from "../ui/card";
 import { doc, updateDoc } from "firebase/firestore";
@@ -145,6 +148,30 @@ export default function CoachDashboard() {
                     </div>
                     <div className="small text-muted">
                       Region: {t.region || "—"}
+                    </div>
+                    <div className="mt-2">
+                      <button
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={async () => {
+                          try {
+                            const snap = await getDoc(doc(db, "teams", t.id));
+                            if (!snap.exists()) return alert("Team not found.");
+                            const payload = { id: snap.id, ...snap.data() };
+                            const ws = XLSX.utils.json_to_sheet([payload]);
+                            const wb = XLSX.utils.book_new();
+                            XLSX.utils.book_append_sheet(wb, ws, "Team");
+                            XLSX.writeFile(
+                              wb,
+                              `${t.teamName || t.name}-team.xlsx`
+                            );
+                          } catch (err) {
+                            console.error(err);
+                            alert("Failed to download team form.");
+                          }
+                        }}
+                      >
+                        <FaDownload className="me-1" /> Download Form
+                      </button>
                     </div>
                   </div>
                 </div>

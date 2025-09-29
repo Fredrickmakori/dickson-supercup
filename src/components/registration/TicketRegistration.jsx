@@ -14,6 +14,8 @@ export default function TicketRegistration() {
     role: "ticket",
   });
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [lastRegistrationId, setLastRegistrationId] = useState(null);
 
   const navigate = useNavigate();
 
@@ -26,8 +28,9 @@ export default function TicketRegistration() {
     if (!acceptedPolicy)
       return alert("You must accept the Terms & Policy to continue.");
     try {
-      await saveRegistration(formData);
-      navigate("/");
+      const id = await saveRegistration(formData);
+      setLastRegistrationId(id);
+      setShowSuccess(true);
     } catch (err) {
       console.error("ticket registration failed", err);
       alert("Failed to submit.");
@@ -105,6 +108,15 @@ export default function TicketRegistration() {
           Get Ticket
         </button>
       </form>
+      <RegistrationSuccess
+        show={showSuccess}
+        onClose={() => {
+          setShowSuccess(false);
+          navigate("/");
+        }}
+        role={formData.role}
+        registrationId={lastRegistrationId}
+      />
     </div>
   );
 }

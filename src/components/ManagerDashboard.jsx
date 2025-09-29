@@ -59,11 +59,11 @@ function ManagerDashboard({ onEdit }) {
     const db = getFirestore(app);
     const ref = doc(db, "teams", id);
     const t = teams.find((x) => x.id === id);
-    const newApproved = !(t && (t.approved || t.paymentStatus === "approved"));
+    const newApproved = !(t && (t.approved || t.paymentStatus === "verified"));
     try {
       await updateDoc(ref, {
         approved: newApproved,
-        paymentStatus: newApproved ? "approved" : "pending",
+        paymentStatus: newApproved ? "verified" : "pending",
       });
       setTeams(
         teams.map((x) =>
@@ -71,7 +71,7 @@ function ManagerDashboard({ onEdit }) {
             ? {
                 ...x,
                 approved: newApproved,
-                paymentStatus: newApproved ? "approved" : "pending",
+                paymentStatus: newApproved ? "verified" : "pending",
               }
             : x
         )
@@ -150,8 +150,12 @@ function ManagerDashboard({ onEdit }) {
                     : "\u2014"}
                 </td>
                 <td>
-                  {t.paymentStatus === "approved" || t.approved ? (
-                    <span className="badge bg-success">Approved</span>
+                  {t.paymentStatus === "verified" || t.approved ? (
+                    <span className="badge bg-success">Verified</span>
+                  ) : t.paymentStatus === "submitted" ? (
+                    <span className="badge bg-info text-dark">Submitted</span>
+                  ) : t.paymentStatus === "rejected" ? (
+                    <span className="badge bg-danger">Rejected</span>
                   ) : (
                     <span className="badge bg-warning text-dark">Pending</span>
                   )}

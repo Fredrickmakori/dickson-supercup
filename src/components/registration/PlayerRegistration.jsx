@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { saveRegistration } from "../../firebase";
+// useNavigate removed (not used) to fix ESLint no-unused-vars
+import RegistrationService from "../../services/RegistrationService";
+import { useAuth } from "../../context/AuthContext";
 import { FaFutbol } from "react-icons/fa";
 import RegistrationSuccess from "./RegistrationSuccess";
 import {
@@ -13,7 +14,10 @@ import {
 import { app } from "../../firebase";
 import { useLocation } from "react-router-dom";
 
+const regService = new RegistrationService();
+
 export default function PlayerRegistration() {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     fullName: "",
     age: "",
@@ -26,7 +30,7 @@ export default function PlayerRegistration() {
   });
 
   const [showSuccess, setShowSuccess] = useState(false); // 👈 controls modal
-  const navigate = useNavigate();
+  const [lastRegistrationId, setLastRegistrationId] = useState(null);
   const [teams, setTeams] = useState([]);
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
 
@@ -72,9 +76,40 @@ export default function PlayerRegistration() {
     }
 
     try {
-      await saveRegistration("player", formData);
-      setShowSuccess(true); // ✅ show modal
+      // if authenticated, ensure user isn't already registered as a player for the selected team
+      if (user && formData.team) {
+        try {
+          const resolvedCheckId = await regService.resolveTeamId(formData.team);
+          if (resolvedCheckId) {
+            const has = await regService.hasPlayerInTeam(
+              user.uid,
+              resolvedCheckId
+            );
+            if (has)
+              return alert(
+                "You have already registered as a player for this team."
+              );
+          }
+        } catch (e) {
+          console.warn("player duplicate check failed", e);
+        }
+      }
+      // Create player doc
+      const playerId = await regService.addPlayer(formData, user || null);
+      setLastRegistrationId(playerId);
+      // If a team was selected (team holds id), attach player to team
+      if (formData.team) {
+        // Resolve team id by id or name and attach
+        const resolvedId = await regService.resolveTeamId(formData.team);
+        if (resolvedId) {
+          await regService.addPlayerToTeam(resolvedId, playerId);
+        } else {
+          console.warn("Team not found for attachment:", formData.team);
+        }
+      }
+      setShowSuccess(true);
     } catch (err) {
+      console.error(err);
       alert("❌ Registration failed. Try again.");
     }
   };
@@ -194,6 +229,9 @@ export default function PlayerRegistration() {
         show={showSuccess}
         onClose={() => setShowSuccess(false)}
         role={formData.role}
+        registrationId={lastRegistrationId}
+        teamId={formData.team || null}
+        teamName={undefined}
       />
     </div>
   );

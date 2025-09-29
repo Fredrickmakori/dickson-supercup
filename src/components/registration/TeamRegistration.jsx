@@ -10,8 +10,10 @@ import {
 } from "react-icons/fa";
 
 // Firestore imports
-import { db } from "../../firebase"; // <-- adjust the path if needed
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import RegistrationService from "../../services/RegistrationService";
+import { useAuth } from "../../context/AuthContext";
+
+const regService = new RegistrationService();
 
 export default function TeamRegistration() {
   const [formData, setFormData] = useState({
@@ -26,6 +28,8 @@ export default function TeamRegistration() {
 
   const navigate = useNavigate();
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
+  const [existingTeams, setExistingTeams] = useState([]);
+  const { user } = useAuth();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -37,15 +41,55 @@ export default function TeamRegistration() {
       return alert("You must accept the Terms & Policy to register.");
 
     try {
-      // Save to Firestore
-      const docRef = await addDoc(collection(db, "teams"), {
-        ...formData,
-        createdAt: serverTimestamp(),
-        paymentStatus: "pending", // update later after verification
-      });
+      // Prevent duplicate team registration by same authenticated user
+      if (user && user.uid) {
+        try {
+          const teamsFound = await regService.findTeamsByUser(user.uid);
+          if (teamsFound && teamsFound.length > 0) {
+            // show inline list of teams to the user instead of an alert
+            setExistingTeams(teamsFound);
+            // scroll to top so the user sees the message
+            try {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            } catch (e) {}
+            return;
+          }
+        } catch (e) {
+          console.warn("duplicate team check failed", e);
+        }
+      }
+      // Check for duplicate by teamName or contactEmail
+      const existingByName = await regService.resolveTeamId(formData.teamName);
+      if (existingByName) {
+        return alert(
+          "A team with this name already exists. Please check the teams list or contact support."
+        );
+      }
 
-      console.log("✅ Team data saved with ID:", docRef.id);
-      console.log("Saved Data:", formData);
+      // Additionally check by contact email (simple linear scan via query)
+      try {
+        const teamsMatchingEmail = await regService.findTeamsByEmail(
+          formData.contactEmail
+        );
+        if (teamsMatchingEmail && teamsMatchingEmail.length > 0) {
+          return alert(
+            "A team with this contact email already exists. If this is your team, please contact the organizer."
+          );
+        }
+      } catch (e) {
+        console.warn("email check failed", e);
+      }
+
+      // Save to Firestore using service and pass current authenticated user so
+      // we persist the user's profile under users/{uid} and only store uid refs on team
+      const teamId = await regService.createTeam(
+        {
+          ...formData,
+          paymentStatus: "pending",
+        },
+        user || null
+      );
+      console.log("✅ Team data saved with ID:", teamId);
 
       // Open M-Changa in a new tab
       window.open(
@@ -120,6 +164,54 @@ export default function TeamRegistration() {
             </button>
           </div>
         </div>
+
+        {/* If user already has registered team(s), show them */}
+        {existingTeams && existingTeams.length > 0 && (
+          <div className="card mb-4">
+            <div className="card-body">
+              <h5 className="mb-2">You already have registered team(s)</h5>
+              <p className="small text-muted">
+                We found the following team(s) linked to your account. If you
+                need to register another team, please contact support.
+              </p>
+              <ul className="list-unstyled">
+                {existingTeams.map((t) => (
+                  <li
+                    key={t.id}
+                    className="d-flex justify-content-between align-items-center py-2 border-bottom"
+                  >
+                    <div>
+                      <div className="fw-semibold">
+                        {t.teamName || t.name || "Untitled"}
+                      </div>
+                      <div className="small text-muted">
+                        {t.region || ""} • {t.category || ""}
+                      </div>
+                    </div>
+                    <div>
+                      <a
+                        className="btn btn-sm btn-outline-primary me-2"
+                        href={`/teams/${t.id}`}
+                      >
+                        View
+                      </a>
+                      <button
+                        className="btn btn-sm btn-outline-secondary"
+                        onClick={() =>
+                          alert(
+                            "Please contact support to register another team."
+                          )
+                        }
+                      >
+                        Contact Support
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Registration Form */}

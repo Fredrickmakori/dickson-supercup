@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FaListOl, FaPlusCircle } from "react-icons/fa";
+import { FaCheckCircle, FaClock, FaTimes, FaUpload } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import {
   getFirestore,
   collection,
-  getDocs,
   onSnapshot,
   query,
   orderBy,
   doc,
   updateDoc,
 } from "firebase/firestore";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { app } from "../firebase"; // ensure firebase is initialized and exported from this module
 import { mapPosition } from "../utils/positionMap";
 
@@ -33,7 +35,8 @@ export default function ViewTeamsPage() {
       q,
       (snap) => {
         const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        setTeams(list);
+        const unique = dedupeTeams(list);
+        setTeams(unique);
         setLoading(false);
       },
       (err) => {
@@ -58,6 +61,39 @@ export default function ViewTeamsPage() {
     return String(value);
   }
 
+  // Remove obvious duplicate team registrations.
+  // We consider teams duplicates when they share the same normalized team name
+  // plus one of manager name, contact email, or uploader user id.
+  function dedupeTeams(list) {
+    const seen = new Set();
+    return list.filter((t) => {
+      const name = (t.teamName || t.name || "").toString().trim().toLowerCase();
+      const manager = (t.managerName || t.manager || t.coach || "")
+        .toString()
+        .trim()
+        .toLowerCase();
+      const email = (t.contactEmail || t.email || "")
+        .toString()
+        .trim()
+        .toLowerCase();
+      const user = (t.userId || t.uid || t.owner || "").toString().trim();
+
+      // Build a composite key from available identifying fields
+      const parts = [];
+      if (name) parts.push(name);
+      if (manager) parts.push(manager);
+      if (email) parts.push(email);
+      if (user) parts.push(user);
+
+      // If we have no meaningful identifying parts, fall back to the doc id
+      const key = parts.length > 0 ? parts.join("|") : t.id;
+
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
   // Inline edit state + simple toast
   const [editingTeamId, setEditingTeamId] = useState(null);
   const [editValues, setEditValues] = useState({});
@@ -66,6 +102,15 @@ export default function ViewTeamsPage() {
     show: false,
     message: "",
     type: "info",
+  });
+
+  // PDF export modal state
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
+  const [pdfTeam, setPdfTeam] = useState(null);
+  const [manualFields, setManualFields] = useState({
+    preparedBy: "",
+    notes: "",
+    extras: [],
   });
 
   function showToast(message, type = "success", ms = 3000) {
@@ -182,6 +227,44 @@ export default function ViewTeamsPage() {
                       <h5 className="mb-0">
                         {team.teamName || team.name || "Unnamed Team"}
                       </h5>
+                      {/* status icon */}
+                      <div className="small mt-1">
+                        {(() => {
+                          const s = (
+                            team.paymentStatus ||
+                            (team.paid ? "verified" : "pending")
+                          )
+                            .toString()
+                            .toLowerCase();
+                          if (s === "verified" || s === "approved") {
+                            return (
+                              <span className="badge bg-success">
+                                <FaCheckCircle className="me-1" /> Verified
+                              </span>
+                            );
+                          }
+                          if (s === "submitted") {
+                            return (
+                              <span className="badge bg-info text-dark">
+                                <FaUpload className="me-1" /> Submitted
+                              </span>
+                            );
+                          }
+                          if (s === "rejected") {
+                            return (
+                              <span className="badge bg-danger">
+                                <FaTimes className="me-1" /> Rejected
+                              </span>
+                            );
+                          }
+                          return (
+                            <span className="badge bg-warning text-dark">
+                              <FaClock className="me-1" />{" "}
+                              {team.paymentStatus || "pending"}
+                            </span>
+                          );
+                        })()}
+                      </div>
                       <small className="text-muted d-block mb-1">
                         {team.managerName ||
                         team.coach ||
@@ -243,6 +326,21 @@ export default function ViewTeamsPage() {
                           }}
                         >
                           Edit
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-primary"
+                          title="Export team to PDF"
+                          onClick={() => {
+                            setPdfTeam(team);
+                            setManualFields({
+                              preparedBy: "",
+                              notes: "",
+                              extras: [],
+                            });
+                            setPdfModalOpen(true);
+                          }}
+                        >
+                          Export PDF
                         </button>
                       </div>
                     </div>
@@ -379,6 +477,191 @@ export default function ViewTeamsPage() {
           </div>
         )}
       </div>
+
+      {/* PDF Export Modal */}
+      {pdfModalOpen && pdfTeam && (
+        <div className="modal show d-block" tabIndex="-1">
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Export Team to PDF</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setPdfModalOpen(false)}
+                />
+              </div>
+              <div className="modal-body">
+                <div className="mb-2">
+                  <label className="form-label small">Prepared By</label>
+                  <input
+                    className="form-control"
+                    value={manualFields.preparedBy}
+                    onChange={(e) =>
+                      setManualFields((m) => ({
+                        ...m,
+                        preparedBy: e.target.value,
+                      }))
+                    }
+                    placeholder="Name or department preparing this export"
+                  />
+                </div>
+                <div className="mb-2">
+                  <label className="form-label small">Notes</label>
+                  <textarea
+                    className="form-control"
+                    rows={3}
+                    value={manualFields.notes}
+                    onChange={(e) =>
+                      setManualFields((m) => ({ ...m, notes: e.target.value }))
+                    }
+                    placeholder="Any additional notes to include in the PDF"
+                  />
+                </div>
+
+                <div className="mb-2">
+                  <label className="form-label small">Additional Fields</label>
+                  {manualFields.extras.map((ex, i) => (
+                    <div key={i} className="d-flex gap-2 mb-2">
+                      <input
+                        className="form-control"
+                        placeholder="Field name"
+                        value={ex.key}
+                        onChange={(e) => {
+                          const copy = [...manualFields.extras];
+                          copy[i] = { ...copy[i], key: e.target.value };
+                          setManualFields((m) => ({ ...m, extras: copy }));
+                        }}
+                      />
+                      <input
+                        className="form-control"
+                        placeholder="Value"
+                        value={ex.value}
+                        onChange={(e) => {
+                          const copy = [...manualFields.extras];
+                          copy[i] = { ...copy[i], value: e.target.value };
+                          setManualFields((m) => ({ ...m, extras: copy }));
+                        }}
+                      />
+                      <button
+                        className="btn btn-outline-danger"
+                        onClick={() => {
+                          const copy = manualFields.extras.filter(
+                            (_, idx) => idx !== i
+                          );
+                          setManualFields((m) => ({ ...m, extras: copy }));
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() =>
+                      setManualFields((m) => ({
+                        ...m,
+                        extras: [...m.extras, { key: "", value: "" }],
+                      }))
+                    }
+                  >
+                    Add field
+                  </button>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="btn btn-outline-secondary"
+                  onClick={() => setPdfModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    try {
+                      // build rows for the PDF table
+                      const team = pdfTeam;
+                      const rows = [];
+                      const push = (k, v) =>
+                        rows.push([
+                          k,
+                          v === undefined || v === null ? "—" : String(v),
+                        ]);
+
+                      push(
+                        "Team Name",
+                        team.teamName || team.name || "Unnamed Team"
+                      );
+                      push(
+                        "Manager",
+                        team.managerName || team.manager || team.coach || "—"
+                      );
+                      push(
+                        "Contact Phone",
+                        team.contactPhone || team.phone || "—"
+                      );
+                      push(
+                        "Contact Email",
+                        team.contactEmail || team.email || "—"
+                      );
+                      push(
+                        "Status",
+                        team.paymentStatus ||
+                          (team.paid ? "approved" : "pending")
+                      );
+                      push("Created", formatDate(team.createdAt));
+                      push(
+                        "User ID",
+                        team.userId || team.uid || team.owner || "—"
+                      );
+                      if (team.positionCode)
+                        push(
+                          "Primary position",
+                          mapPosition(team.positionCode)
+                        );
+
+                      // manual fields
+                      push("Prepared By", manualFields.preparedBy || "");
+                      if (manualFields.notes) push("Notes", manualFields.notes);
+                      manualFields.extras.forEach((ex) => {
+                        if (ex && ex.key) push(ex.key, ex.value);
+                      });
+
+                      const docPDF = new jsPDF();
+                      docPDF.setFontSize(14);
+                      docPDF.text(team.teamName || "Team Details", 14, 14);
+                      autoTable(docPDF, {
+                        startY: 22,
+                        head: [["Field", "Value"]],
+                        body: rows,
+                        styles: { fontSize: 10 },
+                        headStyles: { fillColor: [41, 128, 185] },
+                      });
+
+                      // sanitize filename
+                      const safeName = (team.teamName || "team").replace(
+                        /[^a-z0-9\-\_ ]/gi,
+                        "_"
+                      );
+                      docPDF.save(`${safeName}-details.pdf`);
+                      showToast("PDF exported", "success");
+                    } catch (e) {
+                      console.error("PDF export failed", e);
+                      showToast("PDF export failed", "danger");
+                    } finally {
+                      setPdfModalOpen(false);
+                      setPdfTeam(null);
+                    }
+                  }}
+                >
+                  Generate PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

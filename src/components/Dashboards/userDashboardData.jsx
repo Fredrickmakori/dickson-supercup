@@ -2,12 +2,18 @@ import { useEffect, useState } from "react";
 import { onSnapshot, collection, query, where } from "firebase/firestore";
 import { db } from "../../firebase";
 
-
 export function useDashboardData(collectionName, filters = []) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!collectionName) {
+      console.error("useDashboardData: collectionName is required");
+      setData([]);
+      setLoading(false);
+      return () => {};
+    }
+
     let q = collection(db, collectionName);
 
     // Apply filters if any (like managerId, playerId, etc.)
