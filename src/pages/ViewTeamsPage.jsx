@@ -118,6 +118,97 @@ export default function ViewTeamsPage() {
     setTimeout(() => setToast({ show: false, message: "", type: "info" }), ms);
   }
 
+  // Signup form HTML template generator
+  const signupFormTemplate = (teamName = "") => {
+    const safeTeam = teamName || "";
+    return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tournament Player Sign-up Form</title>
+  <style>
+    @page { size: A4 portrait; margin: 12mm; }
+    @media print { body { margin: 0; -webkit-print-color-adjust: exact; } .no-print { display: none; } }
+    body { font-family: Arial, Helvetica, sans-serif; background: #f2f2f2; margin: 16px; color: #222; }
+    .page { width:210mm; max-width:100%; margin:0 auto; background:white; border-radius:6px; box-shadow:0 6px 18px rgba(0,0,0,0.12); overflow:hidden; padding-bottom:18px; }
+    header { display:flex; gap:16px; align-items:center; padding:18px; background: linear-gradient(90deg,#e53935 0%, #d32f2f 40%); color:white; }
+    .logo { width:84px; height:84px; flex:0 0 84px; background:white; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .logo img { width:100%; height:auto; display:block; }
+    .title { flex:1; }
+    .title h1 { margin:0; font-size:22px; }
+    .accent { height:12px; background: linear-gradient(90deg,#ffd400 0%, #ffec3d 60%); }
+    .meta { display:flex; gap:12px; padding:12px 18px; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(0,0,0,0.06); }
+    .form-area { padding:12px 18px; }
+    .signup-table { width:100%; border-collapse:collapse; margin-top:8px; table-layout:fixed; font-size:13px; }
+    .signup-table thead th { background:#e53935; color:white; font-weight:700; padding:8px 6px; text-align:left; font-size:13px; vertical-align:middle; }
+    .signup-table tbody td { padding:8px 6px; border-bottom:1px dashed rgba(0,0,0,0.06); vertical-align:middle; background:#fff; height:36px; }
+    .col-no { width:5%; text-align:center; font-weight:700; }
+    .col-name { width:28%; }
+    .col-area { width:18%; }
+    .col-team { width:18%; }
+    .col-phone { width:12%; }
+    .col-id { width:10%; }
+    .col-signature { width:9%; text-align:center; }
+    .line { border-bottom:1px solid rgba(0,0,0,0.25); display:inline-block; width:100%; height:16px; }
+    .footer { margin-top:10px; padding:12px 18px; font-size:12px; color:#444; display:flex; justify-content:space-between; gap:12px; }
+  </style>
+</head>
+<body>
+  <div class="page" role="document">
+    <header>
+      <div class="logo" aria-hidden="true"><img src="logo.png" alt="Tournament logo"/></div>
+      <div class="title"><h1>Tournament Sign-up Form</h1><div class="subtitle">Player Sign-up — Please fill clearly. One row per player.</div></div>
+      <div style="min-width:120px; text-align:right;"><div style="font-weight:700; font-size:12px;">Event:</div><div style="font-size:12px;">Super Cup Classic</div></div>
+    </header>
+    <div class="accent" aria-hidden="true"></div>
+    <div class="meta">
+      <div class="meta-left"><div><strong>Date:</strong> ____________________</div><div style="margin-top:6px"><strong>Venue:</strong> ____________________</div></div>
+      <div class="meta-right"><div><strong>Club / Team:</strong> ${safeTeam}</div><div style="margin-top:6px"><strong>Coach / Manager:</strong> ____________________</div></div>
+    </div>
+    <div class="form-area">
+      <table class="signup-table" aria-label="Player sign up table">
+        <thead>
+          <tr>
+            <th class="col-no">No.</th>
+            <th class="col-name">Player Name</th>
+            <th class="col-area">Area</th>
+            <th class="col-team">Team</th>
+            <th class="col-phone">Phone</th>
+            <th class="col-id">ID No</th>
+            <th class="col-signature">Signature</th>
+          </tr>
+        </thead>
+        <tbody>
+` + (() => {
+      // build 20 rows as HTML
+      let rows = '';
+      for (let i = 1; i <= 20; i++) {
+        rows += `<tr><td class="col-no">${i}</td><td class="col-name"><span class="line"></span></td><td class="col-area"><span class="line"></span></td><td class="col-team"><span class="line"></span></td><td class="col-phone"><span class="line"></span></td><td class="col-id"><span class="line"></span></td><td class="col-signature"><span class="line" style="width:90px; display:inline-block;"></span></td></tr>`;
+      }
+      return rows + `</tbody></table></div><div class="footer"><div><small><strong>Note:</strong> By signing, the player confirms they meet age/eligibility requirements.</small></div><div style="text-align:right"><div><strong>Prepared by:</strong> ____________________</div><div style="margin-top:8px"><strong>Official signature:</strong> ____________________</div></div></div></div></body></html>`;
+    })();
+  };
+
+  const downloadSignupForm = (teamName = '') => {
+    try {
+      const html = signupFormTemplate(teamName);
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${(teamName || 'tournament').replace(/[^a-z0-9\-\_ ]/gi,'_')}-signup-form.html`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('Signup form downloaded', 'success');
+    } catch (e) {
+      console.error('Download failed', e);
+      showToast('Failed to download form', 'danger');
+    }
+  };
+
   function validate(values) {
     const errs = {};
     if (!values.managerName || values.managerName.trim().length < 2)
@@ -193,6 +284,15 @@ export default function ViewTeamsPage() {
           >
             Registered Teams
           </h2>
+          <div style={{ marginLeft: 12 }}>
+            <button
+              className="btn btn-sm btn-outline-light"
+              onClick={() => downloadSignupForm('')}
+              title="Download blank signup form"
+            >
+              Download Signup Form
+            </button>
+          </div>
         </div>
       </motion.div>
 
@@ -341,6 +441,13 @@ export default function ViewTeamsPage() {
                           }}
                         >
                           Export PDF
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-success"
+                          title="Download signup form prefilled with team name"
+                          onClick={() => downloadSignupForm(team.teamName || team.name || '')}
+                        >
+                          Download Form
                         </button>
                       </div>
                     </div>
