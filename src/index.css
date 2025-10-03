@@ -115,3 +115,26 @@ html {
 body > .landing-page, body > #root {
   padding-top: 68px; /* approximate header height */
 }
+.navbar-minimal {
+  transform: translateY(-4px);
+  padding-top: 0.15rem !important;
+  padding-bottom: 0.15rem !important;
+  transition: all 120ms ease;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+.navbar-minimal .navbar-brand img { width: 32px; height: 32px; }
+.navbar-minimal .nav-link { padding-top: 0.2rem; padding-bottom: 0.2rem; }
+
+/* Reduce reserved top gap to match smaller header */
+body > .landing-page, body > #root {
+  padding-top: 56px; /* approximate header height */
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .sponsors-track,
+  .navbar-minimal {
+    animation: none !important;
+    transition: none !important;
+  }
+}

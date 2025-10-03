@@ -68,7 +68,7 @@ export default function TopHeader() {
     function onScroll() {
       const cur = window.scrollY;
       // if scrolling down past 80px, enter minimal mode
-      if (cur > 80 && cur > lastScroll) {
+      if (cur > 48 && cur > lastScroll) {
         setMinimal(true);
       } else if (cur <= 80 || cur < lastScroll) {
         // expand when near top or scrolling up
