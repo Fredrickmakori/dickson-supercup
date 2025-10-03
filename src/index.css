@@ -38,3 +38,26 @@ html {
 #app-footer {
   margin-top: auto; /* pushes footer down */
 }
+
+/* Sponsors marquee */
+.sponsors-wrap {
+  overflow: hidden;
+  position: relative;
+}
+.sponsors-track {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  /* duplicated content will create a continuous loop */
+  animation: sponsors-move 28s linear infinite;
+}
+/* move to the right */
+@keyframes sponsors-move {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+.sponsor-logo { max-width: 110px; max-height: 70px; object-fit: contain; }

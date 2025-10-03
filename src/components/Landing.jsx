@@ -2,11 +2,20 @@ import React from "react";
 import { Link } from "react-router-dom";
 import heroBg from "../assets/hero-bg.jpg"; // ✅ import background image
 import SL from "../assets/SL.png";
-import well from "../assets/well.jpg";
+// well image removed because it's unused
 import talent from "../assets/talent.jpg";
 import empowerment from "../assets/empowerment.jpg";
 import Objectives from "./Objectives";
-
+import banick from "../assets/lgs/banick.jpeg";
+import cleo from "../assets/lgs/cleo-super.jpeg";
+import jabali from "../assets/lgs/Jabali-Digital-Logo.png";
+import klik from "../assets/lgs/klik.jpeg";
+import mcFoundational from "../assets/lgs/M-FOUNDATIONAL.jpg";
+import pureFlames from "../assets/lgs/pure-flames.png";
+import redCross from "../assets/lgs/red-cross.jpg";
+import straightMedia from "../assets/lgs/straight-media.jpeg";
+import transNzoia from "../assets/lgs/trans-nzoia.jpg";
+import xtreme from "../assets/lgs/xtreme-media.jpg";
 
 export default function Landing() {
   return (
@@ -20,24 +29,24 @@ export default function Landing() {
         }}
       >
         <div className="container">
-          
-          <p className="display-5 " >
+          <p className="display-5 ">
             Transforming Keiyo Ward into a vibrant, self-sustaining community
             where every vulnerable individual thrives through opportunity,
             talent, and resilient infrastructure.
           </p>
           <div className="d-flex justify-content-center gap-3">
-            <a href="#programs-section" className="btn btn-primary btn-lg shadow">
+            <a
+              href="#programs-section"
+              className="btn btn-primary btn-lg shadow"
+            >
               Our Programs
             </a>
-            <a href="https://www.mchanga.africa/fundraiser/120550" className="btn btn-success btn-lg shadow">
+            <Link to="/donate" className="btn btn-success btn-lg shadow">
               Donate Now
-            </a>
+            </Link>
           </div>
         </div>
       </section>
-
-      
 
       {/* Mission Section */}
       <section className="py-5">
@@ -59,100 +68,99 @@ export default function Landing() {
       </section>
 
       {/* Programs Section */}
-     <section className="py-5 bg-white" id="programs-section">
-  <div className="container">
-    <h2 className="text-center mb-5 fw-bold">Our Programs</h2>
-    <div className="row g-4">
-      
-      {/* Supercup */}
-      <div className="col-md-4">
-        <div className="card h-100 shadow-sm text-center">
-          <img
-            src={SL}
-            className="card-img-top mx-auto mt-4"
-            alt="Dickson Supercup Classic"
-            style={{
-              width: "160px",
-              height: "160px",
-              borderRadius: "50%",
-              objectFit: "cover",
-              border: "4px solid #f8f9fa", // subtle border ring
-            }}
-          />
-          <div className="card-body">
-            <h5 className="card-title">Dickson Supercup Classic</h5>
-            <p className="card-text">
-              A football tournament showcasing local talent and nurturing the skills of youth in Keiyo Ward.
-            </p>
-            <Link to="/supercup" className="btn btn-sm btn-primary">
-              Learn More
-            </Link>
+      <section className="py-5 bg-white" id="programs-section">
+        <div className="container">
+          <h2 className="text-center mb-5 fw-bold">Our Programs</h2>
+          <div className="row g-4">
+            {/* Supercup */}
+            <div className="col-md-4">
+              <div className="card h-100 shadow-sm text-center">
+                <img
+                  src={SL}
+                  className="card-img-top mx-auto mt-4"
+                  alt="Dickson Supercup Classic"
+                  style={{
+                    width: "160px",
+                    height: "160px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "4px solid #f8f9fa", // subtle border ring
+                  }}
+                />
+                <div className="card-body">
+                  <h5 className="card-title">Dickson Supercup Classic</h5>
+                  <p className="card-text">
+                    A football tournament showcasing local talent and nurturing
+                    the skills of youth in Keiyo Ward.
+                  </p>
+                  <Link to="/supercup" className="btn btn-sm btn-primary">
+                    Learn More
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Talent Show */}
+            <div className="col-md-4">
+              <div className="card h-100 shadow-sm text-center">
+                <img
+                  src={talent}
+                  className="card-img-top mx-auto mt-4"
+                  alt="Keiyo Ward Talent Show"
+                  style={{
+                    width: "160px",
+                    height: "160px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "4px solid #f8f9fa",
+                  }}
+                />
+                <div className="card-body">
+                  <h5 className="card-title">Keiyo Ward Talent Show</h5>
+                  <p className="card-text">
+                    A platform for music, dance, and art competitions to
+                    celebrate and develop local artists.
+                  </p>
+                  <Link to="/talent-show" className="btn btn-sm btn-primary">
+                    Learn More
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Empowerment */}
+            <div className="col-md-4">
+              <div className="card h-100 shadow-sm text-center">
+                <img
+                  src={empowerment}
+                  className="card-img-top mx-auto mt-4"
+                  alt="Keiyo Empowerment Programs"
+                  style={{
+                    width: "160px",
+                    height: "160px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "4px solid #f8f9fa",
+                  }}
+                />
+                <div className="card-body">
+                  <h5 className="card-title">Keiyo Empowerment Programs</h5>
+                  <p className="card-text">
+                    Initiatives to refurbish infrastructure like bridges and
+                    wells, and provide training and mentorship.
+                  </p>
+                  <Link to="/empowerment" className="btn btn-sm btn-primary">
+                    Learn More
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Talent Show */}
-      <div className="col-md-4">
-        <div className="card h-100 shadow-sm text-center">
-          <img
-            src={talent}
-            className="card-img-top mx-auto mt-4"
-            alt="Keiyo Ward Talent Show"
-            style={{
-              width: "160px",
-              height: "160px",
-              borderRadius: "50%",
-              objectFit: "cover",
-              border: "4px solid #f8f9fa",
-            }}
-          />
-          <div className="card-body">
-            <h5 className="card-title">Keiyo Ward Talent Show</h5>
-            <p className="card-text">
-              A platform for music, dance, and art competitions to celebrate and develop local artists.
-            </p>
-            <Link to="/talent-show" className="btn btn-sm btn-primary">
-              Learn More
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Empowerment */}
-      <div className="col-md-4">
-        <div className="card h-100 shadow-sm text-center">
-          <img
-            src={empowerment}
-            className="card-img-top mx-auto mt-4"
-            alt="Keiyo Empowerment Programs"
-            style={{
-              width: "160px",
-              height: "160px",
-              borderRadius: "50%",
-              objectFit: "cover",
-              border: "4px solid #f8f9fa",
-            }}
-          />
-          <div className="card-body">
-            <h5 className="card-title">Keiyo Empowerment Programs</h5>
-            <p className="card-text">
-              Initiatives to refurbish infrastructure like bridges and wells, and provide training and mentorship.
-            </p>
-            <Link to="/empowerment" className="btn btn-sm btn-primary">
-              Learn More
-            </Link>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
+      </section>
 
       {/* Objectives Section */}
       <Objectives />
-
 
       {/* Donation Appeal Section */}
       <section className="py-5 bg-light">
@@ -174,6 +182,45 @@ export default function Landing() {
               <strong>75%</strong> for programs, <strong>15%</strong> for
               operations, and <strong>10%</strong> for administration.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Sponsors Section (moved before Success Stories) */}
+      <section className="py-5 bg-white">
+        <div className="container">
+          <h3 className="mb-4 text-center">Our Sponsors</h3>
+          <div className="sponsors-wrap">
+            <div className="sponsors-track">
+              {[
+                banick,
+                cleo,
+                jabali,
+                klik,
+                mcFoundational,
+                pureFlames,
+                redCross,
+                straightMedia,
+                transNzoia,
+                xtreme,
+              ,
+              // duplicate for smooth continuous scroll
+              banick,
+              cleo,
+              jabali,
+              klik,
+              mcFoundational,
+              pureFlames,
+              redCross,
+              straightMedia,
+              transNzoia,
+              xtreme,
+              ].map((src, i) => (
+                <div key={i} className="d-flex align-items-center">
+                  <img src={src} alt={`sponsor-${i}`} className="sponsor-logo" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -218,6 +265,8 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* removed duplicate static sponsors grid; sponsors are shown in the animated marquee above */}
     </div>
   );
 }

@@ -107,13 +107,6 @@ export default function TeamRegistration() {
       const teamId = await regService.createTeam(teamPayload, user || null);
       console.log("✅ Team data saved with ID:", teamId);
 
-      // Open M-Changa in a new tab
-      window.open(
-        "https://www.mchanga.africa/fundraiser/120550",
-        "_blank",
-        "noopener,noreferrer"
-      );
-
       // Show success modal to user and keep them on page until they close it
       setRegisteredTeamId(teamId);
       setSuccessModalOpen(true);
