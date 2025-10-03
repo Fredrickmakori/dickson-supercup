@@ -194,15 +194,47 @@ export default function Landing() {
         </div>
         <div className="sponsors-wrap">
           <div className="sponsors-track">
-            {[banick, cleo, jabali, klik, mcFoundational, pureFlames, redCross, straightMedia, transNzoia, xtreme, everyMoment].map((src, i) => (
+            {[
+              banick,
+              cleo,
+              jabali,
+              klik,
+              mcFoundational,
+              pureFlames,
+              redCross,
+              straightMedia,
+              transNzoia,
+              xtreme,
+              everyMoment,
+            ].map((src, i) => (
               <div key={"a-" + i} className="d-flex align-items-center px-3">
-                <img src={src} alt={`sponsor-a-${i}`} className="sponsor-logo" />
+                <img
+                  src={src}
+                  alt={`sponsor-a-${i}`}
+                  className="sponsor-logo"
+                />
               </div>
             ))}
             {/* duplicate sequence to create an endless loop */}
-            {[banick, cleo, jabali, klik, mcFoundational, pureFlames, redCross, straightMedia, transNzoia, xtreme, everyMoment].map((src, i) => (
+            {[
+              banick,
+              cleo,
+              jabali,
+              klik,
+              mcFoundational,
+              pureFlames,
+              redCross,
+              straightMedia,
+              transNzoia,
+              xtreme,
+              everyMoment,
+            ].map((src, i) => (
               <div key={"b-" + i} className="d-flex align-items-center px-3">
-                <img src={src} alt={`sponsor-b-${i}`} className="sponsor-logo" />
+                <img
+                  src={src}
+                  alt={`sponsor-b-${i}`}
+                  className="sponsor-logo"
+                />
               </div>
             ))}
           </div>

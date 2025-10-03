@@ -8,6 +8,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 export default function TopHeader() {
   const { user, loading, signOutUser, role, setRoleForUser } = useAuth();
   const [userRoles, setUserRoles] = useState([]);
+  const [minimal, setMinimal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -60,6 +61,37 @@ export default function TopHeader() {
       mounted = false;
     };
   }, [user?.uid]);
+
+  // Collapse header into a minimal bar when user scrolls down; expand on focus
+  useEffect(() => {
+    let lastScroll = window.scrollY;
+    function onScroll() {
+      const cur = window.scrollY;
+      // if scrolling down past 80px, enter minimal mode
+      if (cur > 80 && cur > lastScroll) {
+        setMinimal(true);
+      } else if (cur <= 80 || cur < lastScroll) {
+        // expand when near top or scrolling up
+        setMinimal(false);
+      }
+      lastScroll = cur;
+    }
+
+    function onFocusIn(e) {
+      // If any form control or selectable element receives focus, expand header
+      const tag = (e.target && e.target.tagName) || "";
+      if (["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"].includes(tag)) {
+        setMinimal(false);
+      }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("focusin", onFocusIn);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("focusin", onFocusIn);
+    };
+  }, []);
 
   function closeNavbar() {
     try {
@@ -117,8 +149,8 @@ export default function TopHeader() {
   return (
     <header>
       <nav
-        className="navbar navbar-expand-lg navbar-light shadow-sm"
-        style={{ backgroundColor: "#FFEF00" }}
+        className={`navbar navbar-expand-lg navbar-light shadow-sm ${minimal ? "navbar-minimal" : ""}`}
+        style={{ backgroundColor: "#FFEF00", position: "sticky", top: 0, zIndex: 1040 }}
       >
         <div className="container-fluid">
           {/* Brand Logo */}

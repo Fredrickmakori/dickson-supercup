@@ -1,5 +1,10 @@
 import React from "react";
-import { FaFacebookF, FaTwitter, FaInstagram, FaFootballBall } from "react-icons/fa";
+import {
+  FaFacebookF,
+  FaTwitter,
+  FaInstagram,
+  FaFootballBall,
+} from "react-icons/fa";
 import banick from "../assets/lgs/banick.jpeg";
 import cleo from "../assets/lgs/cleo-super.jpeg";
 import jabali from "../assets/lgs/Jabali-Digital-Logo.png";
@@ -19,9 +24,25 @@ export default function AppFooter() {
           <h5 className="fw-bold mb-3">Our Sponsors</h5>
         </div>
         <div className="container d-flex flex-wrap justify-content-center align-items-center gap-3">
-          {[banick, cleo, jabali, klik, mcFoundational, pureFlames, redCross, straightMedia, transNzoia, xtreme, require('../assets/lgs/every-moment.png')].map((s, i) => (
+          {[
+            banick,
+            cleo,
+            jabali,
+            klik,
+            mcFoundational,
+            pureFlames,
+            redCross,
+            straightMedia,
+            transNzoia,
+            xtreme,
+            require("../assets/lgs/every-moment.png"),
+          ].map((s, i) => (
             <div key={i} className="d-flex align-items-center sponsor-item p-2">
-              <img src={s} alt={`footer-sponsor-${i}`} className="sponsor-logo-footer" />
+              <img
+                src={s}
+                alt={`footer-sponsor-${i}`}
+                className="sponsor-logo-footer"
+              />
             </div>
           ))}
         </div>
@@ -37,13 +58,28 @@ export default function AppFooter() {
         </div>
 
         <div className="d-flex justify-content-center gap-3 mt-2">
-          <a href="https://facebook.com" target="_blank" rel="noreferrer" className="text-light">
+          <a
+            href="https://facebook.com"
+            target="_blank"
+            rel="noreferrer"
+            className="text-light"
+          >
             <FaFacebookF size={18} />
           </a>
-          <a href="https://twitter.com" target="_blank" rel="noreferrer" className="text-light">
+          <a
+            href="https://twitter.com"
+            target="_blank"
+            rel="noreferrer"
+            className="text-light"
+          >
             <FaTwitter size={18} />
           </a>
-          <a href="https://instagram.com" target="_blank" rel="noreferrer" className="text-light">
+          <a
+            href="https://instagram.com"
+            target="_blank"
+            rel="noreferrer"
+            className="text-light"
+          >
             <FaInstagram size={18} />
           </a>
         </div>
