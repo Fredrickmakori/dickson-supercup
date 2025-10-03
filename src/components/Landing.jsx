@@ -187,40 +187,20 @@ export default function Landing() {
       </section>
 
       {/* Sponsors Section (moved before Success Stories) */}
-      <section className="py-5 bg-white">
-        <div className="container">
-          <h3 className="mb-4 text-center">Our Sponsors</h3>
-          <div className="sponsors-wrap">
-            <div className="sponsors-track">
-              {[
-                banick,
-                cleo,
-                jabali,
-                klik,
-                mcFoundational,
-                pureFlames,
-                redCross,
-                straightMedia,
-                transNzoia,
-                xtreme,
-              ,
-              // duplicate for smooth continuous scroll
-              banick,
-              cleo,
-              jabali,
-              klik,
-              mcFoundational,
-              pureFlames,
-              redCross,
-              straightMedia,
-              transNzoia,
-              xtreme,
-              ].map((src, i) => (
-                <div key={i} className="d-flex align-items-center">
-                  <img src={src} alt={`sponsor-${i}`} className="sponsor-logo" />
-                </div>
-              ))}
-            </div>
+      <section className="py-4 sponsors-section">
+        <div className="sponsors-wrap">
+          <div className="sponsors-track">
+            {[banick, cleo, jabali, klik, mcFoundational, pureFlames, redCross, straightMedia, transNzoia, xtreme].map((src, i) => (
+              <div key={"a-" + i} className="d-flex align-items-center px-3">
+                <img src={src} alt={`sponsor-a-${i}`} className="sponsor-logo" />
+              </div>
+            ))}
+            {/* duplicate sequence to create an endless loop */}
+            {[banick, cleo, jabali, klik, mcFoundational, pureFlames, redCross, straightMedia, transNzoia, xtreme].map((src, i) => (
+              <div key={"b-" + i} className="d-flex align-items-center px-3">
+                <img src={src} alt={`sponsor-b-${i}`} className="sponsor-logo" />
+              </div>
+            ))}
           </div>
         </div>
       </section>

@@ -44,20 +44,28 @@ html {
   overflow: hidden;
   position: relative;
 }
+.sponsors-section {
+  width: 100%;
+  background: #fff;
+}
+.sponsors-wrap {
+  width: 100%;
+  overflow: hidden;
+}
 .sponsors-track {
   display: flex;
   gap: 2rem;
   align-items: center;
-  /* duplicated content will create a continuous loop */
-  animation: sponsors-move 28s linear infinite;
+  /* duplicated groups inside the track create a seamless loop */
+  animation: sponsors-move 30s linear infinite;
 }
-/* move to the right */
+/* move to the right by sliding the duplicated track into view */
 @keyframes sponsors-move {
   0% {
-    transform: translateX(0%);
+    transform: translateX(-50%);
   }
   100% {
-    transform: translateX(100%);
+    transform: translateX(0%);
   }
 }
 .sponsor-logo { max-width: 110px; max-height: 70px; object-fit: contain; }
