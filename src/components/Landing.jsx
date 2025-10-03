@@ -189,6 +189,9 @@ export default function Landing() {
 
       {/* Sponsors Section (moved before Success Stories) */}
       <section className="py-4 sponsors-section">
+        <div className="container">
+          <h3 className="text-center mb-3 fw-bold">Our Sponsors</h3>
+        </div>
         <div className="sponsors-wrap">
           <div className="sponsors-track">
             {[banick, cleo, jabali, klik, mcFoundational, pureFlames, redCross, straightMedia, transNzoia, xtreme, everyMoment].map((src, i) => (
