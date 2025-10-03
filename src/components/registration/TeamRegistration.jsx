@@ -12,6 +12,7 @@ import {
 // Firestore imports
 import RegistrationService from "../../services/RegistrationService";
 import { useAuth } from "../../context/AuthContext";
+import { Modal, Button } from "react-bootstrap";
 
 const regService = new RegistrationService();
 
@@ -29,7 +30,16 @@ export default function TeamRegistration() {
   const navigate = useNavigate();
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
   const [existingTeams, setExistingTeams] = useState([]);
-  const { user } = useAuth();
+  const { user, signInWithGoogle } = useAuth();
+
+  // detect if the currently authenticated user signed in with Google
+  const isGoogleUser =
+    user && Array.isArray(user.providerData)
+      ? user.providerData.some((p) => p.providerId === "google.com")
+      : false;
+
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [registeredTeamId, setRegisteredTeamId] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -39,6 +49,11 @@ export default function TeamRegistration() {
     e.preventDefault();
     if (!acceptedPolicy)
       return alert("You must accept the Terms & Policy to register.");
+
+    // require Google authentication for registration
+    if (!isGoogleUser) {
+      return alert("Please sign in with Google to register a team.");
+    }
 
     try {
       // Prevent duplicate team registration by same authenticated user
@@ -82,13 +97,14 @@ export default function TeamRegistration() {
 
       // Save to Firestore using service and pass current authenticated user so
       // we persist the user's profile under users/{uid} and only store uid refs on team
-      const teamId = await regService.createTeam(
-        {
-          ...formData,
-          paymentStatus: "pending",
-        },
-        user || null
-      );
+      const teamPayload = {
+        ...formData,
+        paymentStatus: "pending",
+        authProvider: isGoogleUser ? "google" : user ? "email" : "anonymous",
+        registeredBy: user ? user.uid : null,
+      };
+
+      const teamId = await regService.createTeam(teamPayload, user || null);
       console.log("✅ Team data saved with ID:", teamId);
 
       // Open M-Changa in a new tab
@@ -97,6 +113,10 @@ export default function TeamRegistration() {
         "_blank",
         "noopener,noreferrer"
       );
+
+      // Show success modal to user and keep them on page until they close it
+      setRegisteredTeamId(teamId);
+      setSuccessModalOpen(true);
     } catch (error) {
       console.error("❌ Error saving team:", error);
       alert("Failed to register team. Please try again.");
@@ -114,13 +134,33 @@ export default function TeamRegistration() {
       </h2>
 
       <p className="lead text-center text-muted mb-4">
-        Please complete the registration form below to register your team.
+        Please sign in with Google to register a team. This helps verify your
+        identity and speeds up verification.
       </p>
+
+      {!isGoogleUser && (
+        <div className="text-center mb-4">
+          <button
+            className="btn btn-outline-danger fw-bold"
+            onClick={async () => {
+              try {
+                await signInWithGoogle();
+              } catch (err) {
+                console.error("Google sign-in failed", err);
+                alert("Google sign-in failed. Please try again.");
+              }
+            }}
+          >
+            Sign in with Google
+          </button>
+        </div>
+      )}
 
       {/* Registration Form */}
       <form
         className="card p-4 bg-dark text-light shadow-lg"
         onSubmit={handleSubmit}
+        hidden={!isGoogleUser}
       >
         <input
           name="teamName"
@@ -189,6 +229,41 @@ export default function TeamRegistration() {
           Register Team
         </button>
       </form>
+
+      {/* Success Modal */}
+      <Modal
+        show={successModalOpen}
+        onHide={() => {
+          setSuccessModalOpen(false);
+          navigate("/");
+        }}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Registration Submitted</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-2">
+            Your team has been registered successfully. We have opened the
+            payment page; once you complete payment please verify it on the
+            verification page.
+          </p>
+          {registeredTeamId && (
+            <p className="small text-muted">Team ID: {registeredTeamId}</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setSuccessModalOpen(false);
+              navigate("/");
+            }}
+          >
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
