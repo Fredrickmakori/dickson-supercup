@@ -146,6 +146,10 @@ export default function TopHeader() {
     closeNavbar();
   }
 
+  // don't render the top header on the landing/home page so the hero area stays clean
+  const hideOnHome = location && (location.pathname === "/" || location.pathname === "");
+  if (hideOnHome) return null;
+
   return (
     <header>
       <nav
