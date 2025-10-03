@@ -16,6 +16,7 @@ import redCross from "../assets/lgs/red-cross.jpg";
 import straightMedia from "../assets/lgs/straight-media.jpeg";
 import transNzoia from "../assets/lgs/trans-nzoia.jpg";
 import xtreme from "../assets/lgs/xtreme-media.jpg";
+import everyMoment from "../assets/lgs/every-moment.png";
 
 export default function Landing() {
   return (
@@ -190,13 +191,13 @@ export default function Landing() {
       <section className="py-4 sponsors-section">
         <div className="sponsors-wrap">
           <div className="sponsors-track">
-            {[banick, cleo, jabali, klik, mcFoundational, pureFlames, redCross, straightMedia, transNzoia, xtreme].map((src, i) => (
+            {[banick, cleo, jabali, klik, mcFoundational, pureFlames, redCross, straightMedia, transNzoia, xtreme, everyMoment].map((src, i) => (
               <div key={"a-" + i} className="d-flex align-items-center px-3">
                 <img src={src} alt={`sponsor-a-${i}`} className="sponsor-logo" />
               </div>
             ))}
             {/* duplicate sequence to create an endless loop */}
-            {[banick, cleo, jabali, klik, mcFoundational, pureFlames, redCross, straightMedia, transNzoia, xtreme].map((src, i) => (
+            {[banick, cleo, jabali, klik, mcFoundational, pureFlames, redCross, straightMedia, transNzoia, xtreme, everyMoment].map((src, i) => (
               <div key={"b-" + i} className="d-flex align-items-center px-3">
                 <img src={src} alt={`sponsor-b-${i}`} className="sponsor-logo" />
               </div>

@@ -16,7 +16,7 @@ export default function AppFooter() {
     <footer className="app-footer mt-auto" id="app-footer">
       <div className="footer-sponsors py-3 bg-light">
         <div className="container d-flex flex-wrap justify-content-center align-items-center gap-3">
-          {[banick, cleo, jabali, klik, mcFoundational, pureFlames, redCross, straightMedia, transNzoia, xtreme].map((s, i) => (
+          {[banick, cleo, jabali, klik, mcFoundational, pureFlames, redCross, straightMedia, transNzoia, xtreme, require('../assets/lgs/every-moment.png')].map((s, i) => (
             <div key={i} className="d-flex align-items-center sponsor-item p-2">
               <img src={s} alt={`footer-sponsor-${i}`} className="sponsor-logo-footer" />
             </div>
